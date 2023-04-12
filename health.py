@@ -1,6 +1,7 @@
 import yaml
 import requests
 import time
+from urllib.parse import urlparse
 
 
 class HealthCheck:
@@ -13,13 +14,13 @@ class HealthCheck:
         method = site['method'] if 'method' in site else 'GET'
         headers = site['headers'] if 'headers' in site else None
         body = site['body'] if 'body' in site else None
-        result = self.request(url,method,headers=headers,body=body)
-        if name not in self.data:
-            self.data[name] = {'total':0, 'healthy':0}
+        result = self.request(url, method, headers=headers, body=body)
+        domain = urlparse(url).netloc
+        if domain not in self.data:
+            self.data[domain] = {'total':0, 'healthy':0}
         if result:
-            self.data[name]['healthy'] += 1
-        self.data[name]['total'] += 1
-        print('URL {} has {}% availability percentage'.format(url, round(100 * self.data[name]['healthy'] / self.data[name]['total'])))
+            self.data[domain]['healthy'] += 1
+        self.data[domain]['total'] += 1
         return
 
     def request(self, url: str, method:str, headers: dict=None, body: str=None):
@@ -51,6 +52,8 @@ class HealthCheck:
         while True:
             for site in config:
                 self.check(site)
+            for domain in self.data:
+                print('{} has {}% availability percentage'.format(domain, round(100 * self.data[domain]['healthy'] / self.data[domain]['total'])))
             time.sleep(15)
     
 if __name__ == "__main__":
