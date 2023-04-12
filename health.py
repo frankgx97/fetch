@@ -9,7 +9,6 @@ class HealthCheck:
         self.data = {}
 
     def check(self, site: dict):
-        name = site['name']
         url = site['url']
         method = site['method'] if 'method' in site else 'GET'
         headers = site['headers'] if 'headers' in site else None
@@ -29,7 +28,8 @@ class HealthCheck:
                 method=method,
                 url=url,
                 data=body,
-                headers=headers
+                headers=headers,
+                timeout=10
                 )
             time_ms = r.elapsed.total_seconds() * 1000
             if 200 <= r.status_code <= 299 and time_ms <= 500:
